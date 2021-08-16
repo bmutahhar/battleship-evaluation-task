@@ -25,6 +25,22 @@ export interface AdminData {
   password: string;
 }
 
-export interface CellContentProps {
-  borderColor?: string;
+export interface ShipCellProps {
+  cells: number;
+}
+
+export interface ShipAttributes {
+  name: string;
+  length: number;
+  placed: boolean | null;
+  orientation?: string | null;
+  position?: string | null;
+}
+
+export interface HarborProps {
+  availableShips: ShipAttributes[];
+}
+
+export interface GameLayoutProps {
+  availableShips: ShipAttributes[];
 }
