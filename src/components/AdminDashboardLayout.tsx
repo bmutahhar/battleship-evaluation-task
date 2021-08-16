@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from "react";
-import { makeStyles, Theme, useTheme } from "@material-ui/core/styles";
+import { useTheme, Theme, makeStyles } from "@material-ui/core/styles";
 import { useLocation, useHistory, Link } from "react-router-dom";
 import AppBar from "@material-ui/core/AppBar";
 import Toolbar from "@material-ui/core/Toolbar";
@@ -24,12 +24,13 @@ import PersonAddDisabledIcon from "@material-ui/icons/PersonAddDisabled";
 import SvgIcon from "material-ui/SvgIcon";
 import classNames from "classnames";
 
-const drawerWidth = 240;
 interface menuItem {
   title: string;
   path: string;
   icon: React.ReactElement<SvgIcon>;
 }
+
+const drawerWidth = 240;
 
 const menuItems: menuItem[] = [
   {
@@ -87,21 +88,10 @@ const AdminDashboardLayout: React.FC = (props) => {
     const windowWidth = window.innerWidth;
     const breakpointWidth = theme.breakpoints.values.md;
     const isSmallScreen = windowWidth < breakpointWidth;
-    console.log("Window Width:", windowWidth);
-    console.log("Small Screen:", isSmallScreen);
-    console.log("Permanent:", isPermanent);
     if (isSmallScreen && isPermanent) {
-      console.log(isSmallScreen, "inside first if");
-      console.log("Permanent Before:", isPermanent);
-      setIsPermanent(() => {
-        return false;
-      });
-      console.log("Permanent after:", isPermanent);
+      setIsPermanent(false);
     } else if (!isSmallScreen && !isPermanent) {
-      console.log(isSmallScreen, "inside if else");
-      setIsPermanent(() => {
-        return true;
-      });
+      setIsPermanent(true);
     }
   }, [isPermanent, theme.breakpoints.values.md]);
 
@@ -141,11 +131,14 @@ const AdminDashboardLayout: React.FC = (props) => {
             anchorEl={anchorEl}
             open={Boolean(anchorEl)}
             onClose={handleMenuClose}
+            className={classes.profileMenu}
+            disableAutoFocusItem
           >
             <MenuItem
               onClick={() => {
                 handleMenuClose();
                 history.push("/");
+                localStorage.clear();
               }}
             >
               Logout
@@ -245,7 +238,7 @@ const useStyles = makeStyles((theme: Theme) => ({
     overflow: "auto",
   },
   listItem: {
-    color: theme.palette.primary.main,
+    color: theme.palette.secondary.light,
     cursor: "pointer",
   },
   menuIcon: {
@@ -264,7 +257,6 @@ const useStyles = makeStyles((theme: Theme) => ({
     backgroundColor: "#f7f7f7",
     width: "100%",
     height: "100vh",
-    padding: theme.spacing(3),
   },
   toolbar: theme.mixins.toolbar,
   mobileBackButton: {
@@ -283,5 +275,8 @@ const useStyles = makeStyles((theme: Theme) => ({
   },
   avatarIcon: {
     color: theme.palette.primary.main,
+  },
+  profileMenu: {
+    marginTop: theme.spacing(5),
   },
 }));

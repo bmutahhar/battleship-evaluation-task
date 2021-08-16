@@ -1,18 +1,20 @@
 import React, { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useHistory } from "react-router-dom";
 import { makeStyles, Theme } from "@material-ui/core/styles";
 import Typography from "@material-ui/core/Typography";
 import TextField from "@material-ui/core/TextField";
 import Button from "@material-ui/core/Button";
 import Banner from "../components/Banner";
+import Alert from "../components/Alert";
 import styled from "styled-components";
+import { AlertConfig } from "../models";
 
 interface UserData {
   fullname: string;
   username: string;
   email: string;
   password: string;
-  retypePassword: string;
+  confirmPassword: string;
 }
 
 const Signup = () => {
@@ -22,14 +24,97 @@ const Signup = () => {
     username: "",
     email: "",
     password: "",
-    retypePassword: "",
+    confirmPassword: "",
+  });
+  const [alertConfig, setAlertConfig] = useState<AlertConfig>({
+    open: false,
+    message: "",
+    color: "green",
   });
   const classes = useStyles();
+  const history = useHistory();
 
   const onChangeHandler = (event: React.ChangeEvent) => {
     const { name, value }: { name: string; value: string } =
       event.target as HTMLInputElement;
     setUserData({ ...userData, [name]: value.trim() });
+  };
+
+  const closeAlertHandler = () => {
+    setAlertConfig({ ...alertConfig, open: false });
+  };
+
+  const submitData = () => {
+    const url: string = "http://localhost:8080/auth/signup";
+    fetch(url, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        username: userData.username,
+        fullName: userData.fullname,
+        email: userData.email,
+        password: userData.password,
+      }),
+    })
+      .then((resp) => resp.json())
+      .then((respJSON) => {
+        // If response object exists
+        if (respJSON) {
+          if (respJSON.error) {
+            // If error is an object and has msg
+            if (respJSON.error.msg) {
+              setAlertConfig({
+                message: respJSON.error?.msg,
+                color: "red",
+                open: true,
+              });
+            }
+            // else if error is a string
+            else if (respJSON.error) {
+              setAlertConfig({
+                message: respJSON.error,
+                color: "red",
+                open: true,
+              });
+            }
+            // no error object, message property
+            else {
+              if (respJSON.message) {
+                setAlertConfig({
+                  message: respJSON.message,
+                  color: "red",
+                  open: true,
+                });
+              }
+              // Custom error message, not reachable in 99% cases
+              else {
+                setAlertConfig({
+                  message: "Some error occured while parsing your request",
+                  color: "red",
+                  open: true,
+                });
+              }
+            }
+          }
+          //Success case
+          else {
+            setAlertConfig({
+              message:
+                "Account created successfully. An admin will approve your request shortly.",
+              color: "green",
+              open: true,
+            });
+            setTimeout(() => {
+              history.push("/login");
+            }, 1000);
+          }
+        }
+      })
+      .catch((err: Error) => {
+        setAlertConfig({ message: err.message, color: "red", open: true });
+      });
   };
 
   const onSubmitHandler = (event: React.FormEvent) => {
@@ -46,7 +131,7 @@ const Signup = () => {
     } else if (userData.password.trim().length === 0) {
       setErrorMessage("Please enter your password");
       return;
-    } else if (userData.retypePassword.trim().length === 0) {
+    } else if (userData.confirmPassword.trim().length === 0) {
       setErrorMessage("Please retype your password");
       return;
     } else if (userData.username.trim().length < 5) {
@@ -59,11 +144,12 @@ const Signup = () => {
       setErrorMessage(`Password must be minimum eight characters, at least one letter,
        one number and one special character`);
       return;
-    } else if (userData.password.trim() !== userData.retypePassword.trim()) {
-      setErrorMessage("Password do not match correctly");
+    } else if (userData.password.trim() !== userData.confirmPassword.trim()) {
+      setErrorMessage("Passwords do not match correctly");
       return;
+    } else {
+      submitData();
     }
-    console.log(userData);
   };
 
   return (
@@ -122,9 +208,9 @@ const Signup = () => {
               onChange={onChangeHandler}
             />
             <TextField
-              id="retypePassword"
-              name="retypePassword"
-              label="Retype Password"
+              id="confirmPassword"
+              name="confirmPassword"
+              label="Confirm Password"
               type="password"
               className={classes.textField}
               fullWidth
@@ -152,6 +238,12 @@ const Signup = () => {
           </div>
         </div>
       </FormContainer>
+      <Alert
+        open={alertConfig.open}
+        handleClose={closeAlertHandler}
+        message={alertConfig.message}
+        color={alertConfig.color}
+      />
     </Container>
   );
 };

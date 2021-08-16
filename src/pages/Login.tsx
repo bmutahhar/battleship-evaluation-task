@@ -5,7 +5,9 @@ import styled from "styled-components";
 import TextField from "@material-ui/core/TextField";
 import { makeStyles, Theme } from "@material-ui/core/styles";
 import Typography from "@material-ui/core/Typography";
+import Alert from "../components/Alert";
 import Button from "@material-ui/core/Button";
+import { AlertConfig } from "../models";
 
 interface UserCredentials {
   username: string;
@@ -14,10 +16,15 @@ interface UserCredentials {
 
 const Login = () => {
   const [credentials, setCredentials] = useState<UserCredentials>({
-    username: "Mutahhar",
-    password: "Admin123",
+    username: "admin",
+    password: "Admin@123",
   });
   const [errorMessage, setErrorMessage] = useState("");
+  const [alertConfig, setAlertConfig] = useState<AlertConfig>({
+    open: false,
+    message: "",
+    color: "green",
+  });
   const classes = useStyles();
   const history = useHistory();
 
@@ -25,6 +32,88 @@ const Login = () => {
     const { name, value }: { name: string; value: string } =
       event.target as HTMLInputElement;
     setCredentials({ ...credentials, [name]: value.trim() });
+  };
+
+  const closeAlertHandler = () => {
+    setAlertConfig({ ...alertConfig, open: false });
+  };
+
+  const submitData = () => {
+    const url: string = "http://localhost:8080/auth/login";
+    fetch(url, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        username: credentials.username,
+        password: credentials.password,
+      }),
+    })
+      .then((resp) => resp.json())
+      .then((respJSON) => {
+        // If response object exists
+        if (respJSON) {
+          if (respJSON.error) {
+            // if error object has msg key
+            if (respJSON.error.msg) {
+              setAlertConfig({
+                message: respJSON.error?.msg,
+                color: "red",
+                open: true,
+              });
+            }
+            // if error is not an object but contains string message
+            else if (respJSON.error) {
+              setAlertConfig({
+                message: respJSON.error,
+                color: "red",
+                open: true,
+              });
+            } else {
+              // if no error object but string message
+              if (respJSON.message) {
+                setAlertConfig({
+                  message: respJSON.message,
+                  color: "red",
+                  open: true,
+                });
+              }
+              //Custom error message, not reachable in 99% cases
+              else {
+                setAlertConfig({
+                  message: "Some error occured while parsing your request",
+                  color: "red",
+                  open: true,
+                });
+              }
+            }
+          }
+          // Success case
+          else {
+            const token = respJSON.token;
+            const userId = respJSON.userId;
+            const isAdmin = respJSON.isAdmin;
+            localStorage.setItem("token", token);
+            localStorage.setItem("id", userId);
+            setAlertConfig({
+              message: respJSON.message,
+              color: "green",
+              open: true,
+            });
+            setTimeout(() => {
+              if (isAdmin) {
+                history.push("/admin");
+              } else {
+                history.push("/game");
+              }
+            }, 1000);
+          }
+        }
+      })
+      .catch((err: Error) => {
+        setAlertConfig({ message: err.message, color: "red", open: true });
+      });
   };
 
   const onSubmitHandler = (event: React.FormEvent) => {
@@ -35,8 +124,9 @@ const Login = () => {
     } else if (credentials.password.trim().length === 0) {
       setErrorMessage("Please enter a password");
       return;
+    } else {
+      submitData();
     }
-    history.push("/admin/dashboard");
   };
 
   return (
@@ -101,6 +191,12 @@ const Login = () => {
           </div>
         </div>
       </FormContainer>
+      <Alert
+        open={alertConfig.open}
+        handleClose={closeAlertHandler}
+        message={alertConfig.message}
+        color={alertConfig.color}
+      />
     </Container>
   );
 };

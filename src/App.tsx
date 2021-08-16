@@ -2,9 +2,11 @@ import React from "react";
 import { BrowserRouter, Switch, Route, Redirect } from "react-router-dom";
 import { createTheme } from "@material-ui/core/styles";
 import { ThemeProvider } from "@material-ui/styles";
+import PrivateRoute from "./components/PrivateRoute";
 import Login from "./pages/Login";
 import Signup from "./pages/Signup";
 import AdminDashboard from "./pages/AdminDashboard";
+import Game from "./pages/Game";
 
 const theme = createTheme({
   palette: {
@@ -35,14 +37,13 @@ function App() {
           <Route path="/signup">
             <Signup />
           </Route>
-          <Route path="/admin/dashboard">
-            <AdminDashboard />
-          </Route>
+          <PrivateRoute path="/admin/dashboard" component={AdminDashboard} />
           <Route
             exact
             path="/admin"
             render={() => <Redirect to="/admin/dashboard" />}
           />
+          <PrivateRoute path="/game" component={Game} />
         </Switch>
       </BrowserRouter>
     </ThemeProvider>
