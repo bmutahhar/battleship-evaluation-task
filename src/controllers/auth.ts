@@ -4,6 +4,7 @@ import Users, { UserInterface } from "../models/users";
 import { hash, compare } from "bcryptjs";
 import { sign } from "jsonwebtoken";
 
+// POST => /auth/signup
 export const signup = async (req: Request, res: Response) => {
   const errors = validationResult(req);
   // If validation errors exists, do not proceed further
@@ -12,6 +13,7 @@ export const signup = async (req: Request, res: Response) => {
       .status(422)
       .json({ message: "Validation faild.", error: errors.array()[0] });
   }
+  console.log("No validation errors occurred!");
   const {
     fullName,
     username,
@@ -42,7 +44,6 @@ export const signup = async (req: Request, res: Response) => {
         return user.save();
       })
       .then((result) => {
-        console.log(result);
         res
           .status(201)
           .json({ message: "User created successfully!", userId: result._id });
@@ -53,6 +54,7 @@ export const signup = async (req: Request, res: Response) => {
   }
 };
 
+// POST /auth/login
 export const login = (req: Request, res: Response) => {
   const errors = validationResult(req);
   // If validation errors exists, do not proceed further
@@ -101,7 +103,7 @@ export const login = (req: Request, res: Response) => {
             },
             secretKey,
             {
-              expiresIn: "1h",
+              expiresIn: "5h",
             }
           );
           return res.status(200).json({

@@ -1,7 +1,7 @@
 import { Schema, model } from "mongoose";
 
 export interface UserInterface {
-  _id?: Schema.Types.ObjectId;
+  _id?: Schema.Types.ObjectId | string;
   fullName: string;
   username: string;
   email: string;

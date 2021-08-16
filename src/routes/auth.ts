@@ -2,7 +2,6 @@ import express, { Request, Router, Response } from "express";
 import { body } from "express-validator";
 
 import { signup, login } from "../controllers/auth";
-import Users from "../models/users";
 
 const validPasswordRegex =
   /^(?=.*[A-Za-z])(?=.*\d)(?=.*[@$!%*#?&])[A-Za-z\d@$!%*#?&]{8,}$/;
