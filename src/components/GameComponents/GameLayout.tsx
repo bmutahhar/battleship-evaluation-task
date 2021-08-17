@@ -48,6 +48,9 @@ const GameLayout: React.FC<GameLayoutProps> = (props) => {
               Battle Ship
             </Typography>
           </MsgContainer>
+          <Typography variant="h6" className={classes.infoMsg}>
+            {props.message}
+          </Typography>
         </Header>
         <GameContainer>
           <GridRow>
@@ -83,7 +86,7 @@ const GameLayout: React.FC<GameLayoutProps> = (props) => {
               disabled={props.availableShips.length > 0}
               onClick={props.startTurn}
             >
-              Start Game
+              Join Room
             </Button>
           </GridRow>
         </GameContainer>
@@ -98,5 +101,10 @@ const useStyles = makeStyles((theme: Theme) => ({
   msg: {
     margin: 0,
     fontFamily: "frijole",
+  },
+  infoMsg: {
+    fontSize: "1.2rem",
+    fontWeight: 500,
+    marginRight: theme.spacing(2),
   },
 }));

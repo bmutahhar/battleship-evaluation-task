@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from "react";
+import { io } from "socket.io-client";
 import { useHistory } from "react-router";
 import GameLayout from "../components/GameComponents/GameLayout";
-import { Layout, ShipAttributes } from "../models";
+import { Layout, PlayerInfo, ShipAttributes } from "../models";
 import {
   CELL_STATE,
   coordinatesToIndex,
@@ -16,6 +17,11 @@ import {
 
 const AVAILABLE_SHIPS: ShipAttributes[] = [
   {
+    name: "carrier",
+    length: 5,
+    placed: null,
+  },
+  {
     name: "battleship",
     length: 4,
     placed: null,
@@ -25,11 +31,7 @@ const AVAILABLE_SHIPS: ShipAttributes[] = [
     length: 3,
     placed: null,
   },
-  {
-    name: "submarine",
-    length: 3,
-    placed: null,
-  },
+
   {
     name: "destroyer",
     length: 2,
@@ -47,7 +49,6 @@ const Game = () => {
   const [currentState, setCurrentState] = useState("placement");
   const [gameOver, setGameOver] = useState(false);
   const [winner, setWinner] = useState<string>("");
-
   const [currentSelectedShip, setCurrentSelectedShip] =
     useState<ShipAttributes | null>(null);
   const [shipsOnBoard, setShipsOnBoard] = useState<ShipAttributes[]>([]);
@@ -57,6 +58,12 @@ const Game = () => {
   const [hitsByPlayer, setHitsByPlayer] = useState<ShipAttributes[]>([]);
   const [hitsByComputer, setHitsByComputer] = useState<ShipAttributes[]>([]);
   const history = useHistory();
+  const [message, setMessage] = useState("");
+  const [playerInfo, setPlayerInfo] = useState<PlayerInfo>({
+    playerId: 0,
+    connected: false,
+    state: "user",
+  });
 
   const selectShip = (index: number) => {
     const shipToPlace = availableShips[index];
@@ -96,7 +103,9 @@ const Game = () => {
   };
 
   const startTurn = () => {
-    generateComputerShips();
+    // generateComputerShips();
+    connectOnClick();
+    // setMessage('')
     setCurrentState("player-turn");
   };
 
@@ -145,28 +154,6 @@ const Game = () => {
     setShipsOnBoard(sunkShips);
     setHitsByComputer(computerHits);
   };
-
-  // const checkIfGameOver = () => {
-  //   let successfulPlayerHits = hitsByPlayer.filter(
-  //     (hit) => hit.type === "hit"
-  //   ).length;
-  //   let successfulComputerHits = hitsByComputer.filter(
-  //     (hit) => hit.type === "hit"
-  //   ).length;
-
-  //   if (successfulComputerHits === TOTAL_SHIPS_LENGTH.length) {
-  //     setWinner("Computer");
-  //     setCurrentState("game-over");
-  //     return true;
-  //   }
-  //   if (successfulPlayerHits === TOTAL_SHIPS_LENGTH.length) {
-  //     setWinner("Player 1");
-  //     setCurrentState("game-over");
-  //     return true;
-  //   }
-
-  //   return false;
-  // };
 
   const handleComputerTurn = () => {
     changeTurn();
@@ -240,6 +227,29 @@ const Game = () => {
     history.replace("/game");
   };
 
+  const connectOnClick = () => {
+    const socket = io("http://localhost:8080");
+    socket.on("player-number", (data: { playerId: number; pool: number[] }) => {
+      if (data.playerId === -1) {
+        setMessage("Room Full");
+      } else {
+        if (data.playerId === 1) {
+          console.log("My Player ID: ", data.playerId);
+          setPlayerInfo({ playerId: 1, state: "enemy", connected: true });
+        }
+        if (data.pool.length === 2) {
+          setMessage(`Player ${data.pool[0] + 1} has connected`);
+        }
+      }
+    });
+
+    socket.on("player-connection", (data) => {
+      console.log(`Player ${data.playerId + 1} has ${data.action}`);
+      setMessage(`Player ${data.playerId + 1} has ${data.action}`);
+    });
+  };
+
+  // Use effect to checking game over conditions
   useEffect(() => {
     let successfulPlayerHits = hitsByPlayer.filter(
       (hit) => hit.type === "hit"
@@ -265,6 +275,30 @@ const Game = () => {
     }
   }, [hitsByComputer, hitsByPlayer]);
 
+  // use effect for socket io code
+  // useEffect(() => {
+  //   const socket = io("http://localhost:8080");
+  //   socket.on("player-number", (playerId: number) => {
+  //     console.log("Played Id: ", playerId);
+  //     if (playerId === -1) {
+  //       setMessage("Room Full");
+  //     } else {
+  //       if (playerId === 1) {
+  //         setPlayerInfo({ playerId: 1, state: "enemy", connected: true });
+  //       }
+  //     }
+  //   });
+
+  //   socket.on("player-connection", (data) => {
+  //     console.log(`Player number ${data.playerId} has ${data.action}`);
+  //     setMessage(`Player number ${data.playerId} has ${data.action}`);
+  //   });
+
+  //   return () => {
+  //     socket.disconnect();
+  //   };
+  // }, []);
+
   return (
     <GameLayout
       availableShips={availableShips}
@@ -283,12 +317,12 @@ const Game = () => {
       hitsByComputer={hitsByComputer}
       setHitsByComputer={setHitsByComputer}
       handleComputerTurn={handleComputerTurn}
-      // checkIfGameOver={checkIfGameOver}
       startAgain={startAgain}
       quitGame={quitGame}
       winner={winner}
       setComputerShips={setComputerShips}
       gameOver={gameOver}
+      message={message}
     />
   );
 };

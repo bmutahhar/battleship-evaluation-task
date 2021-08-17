@@ -103,7 +103,6 @@ const OpponentBoard: React.FC<OpponentBoardProps> = ({
         //   stateToCSSClass[cell] === "hit" ||
         //   stateToCSSClass[cell] === "miss" ||
         //   stateToCSSClass[cell] === "ship-sunk" ||
-        //   stateToCSSClass[index] === "ship"
         //     ? `${stateToCSSClass[cell]}`
         //     : ``
         // }

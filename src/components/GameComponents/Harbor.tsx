@@ -9,7 +9,8 @@ const Harbor: React.FC<HarborProps> = (props) => {
       <div>
         <Typography variant="body2" align="center" gutterBottom>
           Click on the ship to select, <br /> then place it on the board. <br />{" "}
-          Right click to rotate it.
+          Right click to rotate it. <br />
+          After placing the ships, <br /> click join room.
         </Typography>
       </div>
 

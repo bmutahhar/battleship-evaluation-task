@@ -90,4 +90,11 @@ export interface GameLayoutProps
   startTurn: () => void;
   changeTurn: () => void;
   setHitsByComputer: Dispatch<React.SetStateAction<ShipAttributes[]>>;
+  message: string;
+}
+
+export interface PlayerInfo {
+  playerId: number | null;
+  connected: boolean | null;
+  state: string | null;
 }
