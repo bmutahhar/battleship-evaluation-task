@@ -45,10 +45,6 @@ export interface ShipAttributes {
   sunk?: boolean | null;
   type?: string | null;
 }
-export interface CellProps {
-  opponent?: boolean;
-  // onMouseDown: (event: MouseEvent) => void;
-}
 
 export interface ShipProps {
   cells: number;
@@ -63,23 +59,34 @@ export interface HarborProps {
 export interface PlayerBoardProps {
   placeShipOnBoard: (currentSelectedShip: ShipAttributes) => void;
   shipsOnBoard: ShipAttributes[];
-  rotateShip: (event: MouseEvent) => void;
+  rotateShip: (event: React.MouseEvent<HTMLElement, MouseEvent>) => void;
   currentSelectedShip: ShipAttributes | null;
   setCurrentSelectedShip: Dispatch<React.SetStateAction<ShipAttributes | null>>;
   hitsByComputer: ShipAttributes[];
 }
 
-export interface GameLayoutProps extends HarborProps, PlayerBoardProps {
-  startTurn: () => void;
+export interface OpponentBoardProps {
   computerShips: ShipAttributes[];
   setComputerShips: Dispatch<React.SetStateAction<ShipAttributes[]>>;
   currentState: string;
-  changeTurn: () => void;
   hitsByPlayer: ShipAttributes[];
   setHitsByPlayer: Dispatch<React.SetStateAction<ShipAttributes[]>>;
-  setHitsByComputer: Dispatch<React.SetStateAction<ShipAttributes[]>>;
   handleComputerTurn: () => void;
-  checkIfGameOver: () => void;
-  startAgain: () => void;
+  checkIfGameOver: () => boolean;
+}
+
+export interface GameOverProps {
   winner: string;
+  startAgain: () => void;
+  quitGame: () => void;
+}
+
+export interface GameLayoutProps
+  extends HarborProps,
+    PlayerBoardProps,
+    OpponentBoardProps,
+    GameOverProps {
+  startTurn: () => void;
+  changeTurn: () => void;
+  setHitsByComputer: Dispatch<React.SetStateAction<ShipAttributes[]>>;
 }

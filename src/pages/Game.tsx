@@ -1,4 +1,5 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import { useHistory } from "react-router";
 import GameLayout from "../components/GameComponents/GameLayout";
 import { Layout, ShipAttributes } from "../models";
 import {
@@ -9,7 +10,7 @@ import {
   generateRandomIndex,
   getNeighbors,
   indexToCoordinates,
-  placeEntityInLayout,
+  placeShipInLayout,
   updateSunkShips,
 } from "../utils/layoutUtils";
 
@@ -44,6 +45,7 @@ const TOTAL_SHIPS_LENGTH = AVAILABLE_SHIPS.slice().reduce(
 
 const Game = () => {
   const [currentState, setCurrentState] = useState("placement");
+  // const [currentState, setCurrentState] = useState("game-over");
   const [winner, setWinner] = useState<string>("");
 
   const [currentSelectedShip, setCurrentSelectedShip] =
@@ -54,6 +56,7 @@ const Game = () => {
   const [computerShips, setComputerShips] = useState<ShipAttributes[]>([]);
   const [hitsByPlayer, setHitsByPlayer] = useState<ShipAttributes[]>([]);
   const [hitsByComputer, setHitsByComputer] = useState<ShipAttributes[]>([]);
+  const history = useHistory();
 
   const selectShip = (index: number) => {
     const shipToPlace = availableShips[index];
@@ -79,7 +82,8 @@ const Game = () => {
     setCurrentSelectedShip(null);
   };
 
-  const rotateShip = (event: MouseEvent) => {
+  const rotateShip = (event: React.MouseEvent<HTMLElement, MouseEvent>) => {
+    event.preventDefault();
     if (currentSelectedShip != null && event.button === 2) {
       setCurrentSelectedShip({
         ...currentSelectedShip,
@@ -100,6 +104,11 @@ const Game = () => {
     setCurrentState((oldGameState) =>
       oldGameState === "player-turn" ? "computer-turn" : "player-turn"
     );
+  };
+
+  const quitGame = () => {
+    history.push("/");
+    localStorage.clear();
   };
 
   // *** COMPUTER ***
@@ -145,19 +154,14 @@ const Game = () => {
       (hit) => hit.type === "hit"
     ).length;
 
-    if (
-      successfulComputerHits === TOTAL_SHIPS_LENGTH.length ||
-      successfulPlayerHits === TOTAL_SHIPS_LENGTH.length
-    ) {
+    if (successfulComputerHits === TOTAL_SHIPS_LENGTH.length) {
+      setWinner("Computer");
       setCurrentState("game-over");
-
-      if (successfulComputerHits === TOTAL_SHIPS_LENGTH.length) {
-        setWinner("computer");
-      }
-      if (successfulPlayerHits === TOTAL_SHIPS_LENGTH.length) {
-        setWinner("player");
-      }
-
+      return true;
+    }
+    if (successfulPlayerHits === TOTAL_SHIPS_LENGTH.length) {
+      setWinner("Player 1");
+      setCurrentState("game-over");
       return true;
     }
 
@@ -168,26 +172,27 @@ const Game = () => {
     changeTurn();
 
     if (checkIfGameOver()) {
+      console.log("Game");
       return;
     }
 
     // Recreate layout to get eligible squares
     let layout = shipsOnBoard.reduce(
       (prevLayout, currentShip) =>
-        placeEntityInLayout(prevLayout, currentShip, CELL_STATE.ship),
+        placeShipInLayout(prevLayout, currentShip, CELL_STATE.ship),
       generateEmptyBoard()
     );
 
     layout = hitsByComputer.reduce(
       (prevLayout, currentHit) =>
-        placeEntityInLayout(prevLayout, currentHit, currentHit.type!),
+        placeShipInLayout(prevLayout, currentHit, currentHit.type!),
       layout
     );
 
     layout = shipsOnBoard.reduce(
       (prevLayout, currentShip) =>
         currentShip.sunk
-          ? placeEntityInLayout(prevLayout, currentShip, CELL_STATE.ship_sunk)
+          ? placeShipInLayout(prevLayout, currentShip, CELL_STATE.ship_sunk)
           : prevLayout,
       layout
     );
@@ -200,16 +205,16 @@ const Game = () => {
       const hitIndex = coordinatesToIndex(hit.position!);
       return layout[hitIndex] === "hit";
     });
-    console.log("nonSunkComputerHits: ", nonSunkComputerHits);
-    let potentialTargets = nonSunkComputerHits
+    let potentialTargets: any[] = nonSunkComputerHits
       .flatMap((hit) => getNeighbors(hit.position!))
       .filter((idx) => layout[idx] === "empty" || layout[idx] === "ship");
 
     // Until there's a successful hit
+
     if (potentialTargets.length === 0) {
-      let layoutIndices = layout.map((item, idx) => idx);
+      let layoutIndices = layout.map((_: string, idx: number) => idx);
       potentialTargets = layoutIndices.filter(
-        (index) => layout[index] === "ship" || layout[index] === "empty"
+        (index: any) => layout[index] === "ship" || layout[index] === "empty"
       );
     }
 
@@ -232,6 +237,7 @@ const Game = () => {
     setComputerShips([]);
     setHitsByPlayer([]);
     setHitsByComputer([]);
+    history.replace("/game");
   };
 
   return (
@@ -254,6 +260,7 @@ const Game = () => {
       handleComputerTurn={handleComputerTurn}
       checkIfGameOver={checkIfGameOver}
       startAgain={startAgain}
+      quitGame={quitGame}
       winner={winner}
       setComputerShips={setComputerShips}
     />

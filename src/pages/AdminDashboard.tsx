@@ -1,15 +1,16 @@
 import React from "react";
 import { Switch, Route, useRouteMatch } from "react-router-dom";
-import AdminDashboardLayout from "../components/AdminDashboardLayout";
+import AdminDashBoardLayout from "../components/AdminDashboardLayout";
+
 import Requests from "../components/Requests";
 import Users from "../components/Users";
 import CreateAdmin from "../components/CreateAdmin";
 import RemoveUsers from "../components/RemoveUsers";
 
-const AdminDashboard = () => {
+const AdminDashBoard = () => {
   const { path }: { path: string } = useRouteMatch();
   return (
-    <AdminDashboardLayout>
+    <AdminDashBoardLayout>
       <Switch>
         <Route
           exact
@@ -20,8 +21,8 @@ const AdminDashboard = () => {
         <Route path={[`${path}/newUser`]} render={() => <CreateAdmin />} />
         <Route path={[`${path}/removeUser`]} render={() => <RemoveUsers />} />
       </Switch>
-    </AdminDashboardLayout>
+    </AdminDashBoardLayout>
   );
 };
 
-export default AdminDashboard;
+export default AdminDashBoard;

@@ -1,7 +1,7 @@
 import { Coordinates, ShipAttributes, Layout } from "../models";
-export const BOARD_ROWS = 10;
-export const BOARD_COLUMNS = 10;
-export const BOARD = BOARD_COLUMNS * BOARD_ROWS;
+export const ROWS = 10;
+export const COLUMNS = 10;
+export const TOTAL_CELLS = COLUMNS * ROWS;
 
 export const CELL_STATE = {
   empty: "empty",
@@ -23,22 +23,22 @@ export const stateToCSSClass = {
 
 // Returns an array with .empty classes => Empty Board
 export const generateEmptyBoard = (): Layout => {
-  return new Array(BOARD_ROWS * BOARD_COLUMNS).fill(CELL_STATE.empty);
+  return new Array(ROWS * COLUMNS).fill(CELL_STATE.empty);
 };
 
 // Returns the index of a clicked cell
 export const coordinatesToIndex = (coordinates: Coordinates): number => {
   const { x, y }: Coordinates = coordinates;
 
-  return y * BOARD_ROWS + x;
+  return y * ROWS + x;
 };
 
 // Return the coordinates of a clicked cell
 
 export const indexToCoordinates = (index: number): Coordinates => {
   return {
-    x: index % BOARD_ROWS,
-    y: Math.floor(index / BOARD_ROWS),
+    x: index % ROWS,
+    y: Math.floor(index / ROWS),
   };
 };
 // Returns the indices that the placing entity would take up
@@ -47,23 +47,22 @@ export const getIndices = (ship: ShipAttributes): number[] => {
   const indices: number[] = [];
   Array.from(Array(ship.length).keys()).forEach(() => {
     indices.push(index);
-    index = ship.orientation === "vertical" ? index + BOARD_ROWS : index + 1;
+    index = ship.orientation === "vertical" ? index + ROWS : index + 1;
   });
 
-  console.log("Indices: ", indices);
   return indices;
 };
 
 export const withInBounds = (ship: ShipAttributes): boolean => {
   return (
     (ship.orientation === "vertical" &&
-      ship.position!.y + ship.length! <= BOARD_ROWS) ||
+      ship.position!.y + ship.length! <= ROWS) ||
     (ship.orientation === "horizontal" &&
-      ship.position!.x + ship.length! <= BOARD_COLUMNS)
+      ship.position!.x + ship.length! <= COLUMNS)
   );
 };
 
-export const placeEntityInLayout = (
+export const placeShipInLayout = (
   oldLayout: Layout,
   entity: ShipAttributes,
   type: string
@@ -72,7 +71,6 @@ export const placeEntityInLayout = (
   const position = entity.position!;
 
   if (type === "ship") {
-    console.log(entity);
     getIndices(entity).forEach((index) => {
       newLayout[index] = CELL_STATE.ship;
     });
@@ -97,7 +95,6 @@ export const placeEntityInLayout = (
       newLayout[index] = CELL_STATE.ship_sunk;
     });
   }
-  console.log(newLayout);
   return newLayout;
 };
 
@@ -109,31 +106,31 @@ export const isPlaceEmpty = (ship: ShipAttributes, layout: Layout) => {
 };
 
 // Calculate the number of cells that goes over bound while placing the ship to highlight
-// the remaining cells within the board
+// the remaining cells within the Board
 export const calculateOutOfBoundCells = (ship: ShipAttributes): number => {
   return Math.max(
     ship.orientation === "vertical"
-      ? ship.position!.y + ship.length! - BOARD_ROWS
-      : ship.position!.x + ship.length! - BOARD_COLUMNS,
+      ? ship.position!.y + ship.length! - ROWS
+      : ship.position!.x + ship.length! - COLUMNS,
     0
   );
 };
 
-// Check if ship is with in the board's bound and the desired space is empty so ship can be placed
+// Check if ship is with in the Board's bound and the desired space is empty so ship can be placed
 export const canBePlaced = (ship: ShipAttributes, layout: Layout): boolean =>
   isPlaceEmpty(ship, layout) && withInBounds(ship);
 
 // Computer Opponent Methods
 
-// Generate a random orientation and starting index on board for computer ships
+// Generate a random orientation and starting index on Board for computer ships
 export const generateRandomOrientation = () => {
   let randomNumber = Math.floor(Math.random() * 2);
 
   return randomNumber === 1 ? "vertical" : "horizontal";
 };
 
-export const generateRandomIndex = (value = BOARD) => {
-  return Math.floor(Math.random() * BOARD);
+export const generateRandomIndex = (value = TOTAL_CELLS) => {
+  return Math.floor(Math.random() * Math.floor(value));
 };
 
 // Assign a ship a random orientation and set of coordinates
@@ -147,7 +144,7 @@ export const randomizeShipProps = (ship: ShipAttributes) => {
   };
 };
 
-// Generate random ships on opponent's board
+// Generate random ships on opponent's Board
 export const generateOpponentsShipsInLayout = (
   opponentShips: ShipAttributes[]
 ) => {
@@ -156,7 +153,7 @@ export const generateOpponentsShipsInLayout = (
     while (true) {
       let randomizedShip = randomizeShipProps(ship);
       if (canBePlaced(randomizedShip, opponentLayout)) {
-        opponentLayout = placeEntityInLayout(
+        opponentLayout = placeShipInLayout(
           opponentLayout,
           randomizedShip,
           CELL_STATE.ship
@@ -224,7 +221,7 @@ export const getNeighbors = (coords: Coordinates) => {
     ...new Set(
       neighbors
         .map((coords) => coordinatesToIndex(coords))
-        .filter((number) => number >= 0 && number < BOARD)
+        .filter((number) => number >= 0 && number < TOTAL_CELLS)
     ),
   ];
 
@@ -236,6 +233,7 @@ export const updateSunkShips = (
   currentHits: ShipAttributes[],
   opponentShips: ShipAttributes[]
 ): ShipAttributes[] => {
+  console.log(currentHits);
   let playerHitIndices = currentHits.map((hit: ShipAttributes) =>
     coordinatesToIndex(hit.position!)
   );

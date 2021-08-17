@@ -35,27 +35,27 @@ const drawerWidth = 240;
 const menuItems: menuItem[] = [
   {
     title: "New Requests",
-    path: "/admin/dashboard/requests",
+    path: "/admin/dashBoard/requests",
     icon: <GroupAddIcon color="primary" />,
   },
   {
     title: "Users",
-    path: "/admin/dashboard/users",
+    path: "/admin/dashBoard/users",
     icon: <PeopleIcon color="primary" />,
   },
   {
     title: "Create Admin",
-    path: "/admin/dashboard/newUser",
+    path: "/admin/dashBoard/newUser",
     icon: <PersonAddIcon color="primary" />,
   },
   {
     title: "Remove User",
-    path: "/admin/dashboard/removeUser",
+    path: "/admin/dashBoard/removeUser",
     icon: <PersonAddDisabledIcon color="primary" />,
   },
 ];
 
-const AdminDashboardLayout: React.FC = (props) => {
+const AdminDashBoardLayout: React.FC = (props) => {
   const [isPermanent, setIsPermanent] = useState<boolean>(true);
   const [openSidebar, setOpenSidebar] = useState<boolean>(!isPermanent);
   const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
@@ -117,7 +117,7 @@ const AdminDashboardLayout: React.FC = (props) => {
               [classes.headerMargin]: !isPermanent,
             })}
             component={Link}
-            to="/admin/dashboard"
+            to="/admin/dashBoard"
           >
             Battle Ship
           </Typography>
@@ -198,7 +198,7 @@ const AdminDashboardLayout: React.FC = (props) => {
   );
 };
 
-export default AdminDashboardLayout;
+export default AdminDashBoardLayout;
 
 const useStyles = makeStyles((theme: Theme) => ({
   root: {

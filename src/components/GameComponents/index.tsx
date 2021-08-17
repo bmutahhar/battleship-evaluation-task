@@ -1,5 +1,5 @@
 import styled from "styled-components";
-import { CellProps, ShipProps } from "../../models";
+import { ShipProps } from "../../models";
 
 export const Container = styled.div`
   width: 100%;
@@ -99,13 +99,13 @@ export const HeaderCell = styled.div`
   justify-content: center;
 `;
 
-export const Cell = styled.div<CellProps>`
+export const Cell = styled.div`
   width: 10%;
   height: 10%;
   border: 1px solid rgba(86, 104, 209, 0.5);
   margin-left: -1px;
   margin-top: -1px;
-  ${(props) => (!props.opponent ? `cursor: crosshair;` : "")}
+  cursor: crosshair;
 `;
 export const HarborContainer = styled.div`
   height: 100%;

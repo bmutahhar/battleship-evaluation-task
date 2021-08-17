@@ -1,4 +1,4 @@
-import React from "react";
+import React, { MouseEvent } from "react";
 import Typography from "@material-ui/core/Typography";
 import {
   GridContainer,
@@ -8,11 +8,112 @@ import {
   RowHeader,
   Cell,
 } from "./index";
+import { Layout, OpponentBoardProps } from "../../models";
+import {
+  CELL_STATE,
+  COLUMNS,
+  generateEmptyBoard,
+  indexToCoordinates,
+  placeShipInLayout,
+  stateToCSSClass,
+  updateSunkShips,
+} from "../../utils/layoutUtils";
 
-const OpponentBoard = () => {
-  const gridSize = 10;
-  const headerArray = Array.from(Array(gridSize).keys());
-  const cellArray = Array.from(Array(gridSize * gridSize).keys());
+const OpponentBoard: React.FC<OpponentBoardProps> = ({
+  computerShips,
+  setComputerShips,
+  hitsByPlayer,
+  setHitsByPlayer,
+  currentState,
+  checkIfGameOver,
+  handleComputerTurn,
+}) => {
+  const headerArray = Array.from(Array(COLUMNS).keys());
+
+  // Ships on an empty layout
+  let opponentLayout: Layout = computerShips.reduce(
+    (prevLayout, currentShip) =>
+      placeShipInLayout(prevLayout, currentShip, CELL_STATE.ship),
+    generateEmptyBoard()
+  );
+
+  //Generate hits done by 1st player
+  opponentLayout = hitsByPlayer.reduce(
+    (prevLayout, currentHit) =>
+      placeShipInLayout(prevLayout, currentHit, currentHit.type!),
+    opponentLayout
+  );
+
+  // Updated sunken ships on 2nd player's board
+  opponentLayout = computerShips.reduce(
+    (prevLayout, currentShip) =>
+      currentShip.sunk
+        ? placeShipInLayout(prevLayout, currentShip, CELL_STATE.ship_sunk)
+        : prevLayout,
+    opponentLayout
+  );
+
+  const fireAway = (index: number) => {
+    if (opponentLayout[index] === "ship") {
+      const newHits = [
+        ...hitsByPlayer,
+        {
+          position: indexToCoordinates(index),
+          type: CELL_STATE.hit,
+        },
+      ];
+      setHitsByPlayer(newHits);
+      return newHits;
+    } else if (opponentLayout[index] === "empty") {
+      const newHits = [
+        ...hitsByPlayer,
+        {
+          position: indexToCoordinates(index),
+          type: CELL_STATE.miss,
+        },
+      ];
+      setHitsByPlayer(newHits);
+      return newHits;
+    }
+  };
+
+  const playerTurn = currentState === "player-turn";
+  const playerCanFire = playerTurn && !checkIfGameOver();
+
+  const alreadyHit = (index: number) =>
+    opponentLayout[index] === "hit" ||
+    opponentLayout[index] === "miss" ||
+    opponentLayout[index] === "ship-sunk";
+
+  const onClickHandler = (index: number) => {
+    if (playerCanFire && !alreadyHit(index)) {
+      const newHits = fireAway(index);
+      const shipsWithSunkFlag = updateSunkShips(newHits!, computerShips);
+      setComputerShips(shipsWithSunkFlag);
+      handleComputerTurn();
+    }
+  };
+
+  const opponentCells = opponentLayout.map((cell: string, index: number) => {
+    return (
+      <Cell
+        onContextMenu={(e: MouseEvent<HTMLElement>) => e.preventDefault()}
+        // className={
+        //   stateToCSSClass[cell] === "hit" ||
+        //   stateToCSSClass[cell] === "miss" ||
+        //   stateToCSSClass[cell] === "ship-sunk" ||
+        //   stateToCSSClass[index] === "ship"
+        //     ? `${stateToCSSClass[cell]}`
+        //     : ``
+        // }
+        className={stateToCSSClass[cell]}
+        key={`opponent-cell-${index}`}
+        id={`opponent-cell-${index}`}
+        onClick={() => onClickHandler(index)}
+      />
+    );
+  });
+
   return (
     <div>
       <div>
@@ -31,11 +132,7 @@ const OpponentBoard = () => {
             <HeaderCell key={item}>{item + 1}</HeaderCell>
           ))}
         </RowHeader>
-        <Grid className="game-grid">
-          {cellArray.map((item: number) => {
-            return <Cell key={item} opponent={true} />;
-          })}
-        </Grid>
+        <Grid className="game-grid opponent-board">{opponentCells}</Grid>
       </GridContainer>
     </div>
   );

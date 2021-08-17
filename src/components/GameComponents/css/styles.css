@@ -50,7 +50,7 @@
 
 /* Sunk ship */
 
-.board .ship-sunk {
+.ship-sunk {
   background-color: var(--ship-sunk-color);
   border: 1px solid var(--ship-sunk-color-dark);
   animation: shake 50ms 6 alternate backwards;
@@ -58,7 +58,7 @@
 
 /* Forbidden square  */
 
-.board .forbidden {
+.forbidden {
   background-color: var(--forbidden-color);
   border: 1px solid var(--forbidden-color-dark);
 }

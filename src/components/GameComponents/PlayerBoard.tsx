@@ -10,14 +10,13 @@ import {
 } from "./index";
 import { Layout, PlayerBoardProps, ShipAttributes } from "../../models";
 import {
-  BOARD,
-  BOARD_COLUMNS,
+  COLUMNS,
   calculateOutOfBoundCells,
   canBePlaced,
   CELL_STATE,
   generateEmptyBoard,
   indexToCoordinates,
-  placeEntityInLayout,
+  placeShipInLayout,
   stateToCSSClass,
 } from "../../utils/layoutUtils";
 
@@ -29,20 +28,19 @@ const PlayerBoard: React.FC<PlayerBoardProps> = ({
   hitsByComputer,
   rotateShip,
 }) => {
-  const headerArray = Array.from(Array(BOARD_COLUMNS).keys());
-  const cellArray = Array.from(Array(BOARD).keys());
+  const headerArray = Array.from(Array(COLUMNS).keys());
 
   // Player ships on empty layout
   let layout = shipsOnBoard.reduce(
     (prevLayout: Layout, currentShip: ShipAttributes) =>
-      placeEntityInLayout(prevLayout, currentShip, CELL_STATE.ship),
+      placeShipInLayout(prevLayout, currentShip, CELL_STATE.ship),
     generateEmptyBoard()
   );
 
   // Hits by computer
   layout = hitsByComputer.reduce(
     (prevLayout: Layout, currentHit: ShipAttributes) =>
-      placeEntityInLayout(prevLayout, currentHit, CELL_STATE.hit),
+      placeShipInLayout(prevLayout, currentHit, currentHit.type!),
     layout
   );
 
@@ -50,7 +48,7 @@ const PlayerBoard: React.FC<PlayerBoardProps> = ({
   layout = shipsOnBoard.reduce(
     (prevLayout: Layout, currentShip: ShipAttributes) =>
       currentShip.sunk
-        ? placeEntityInLayout(prevLayout, currentShip, CELL_STATE.ship_sunk)
+        ? placeShipInLayout(prevLayout, currentShip, CELL_STATE.ship_sunk)
         : prevLayout,
     layout
   );
@@ -61,11 +59,7 @@ const PlayerBoard: React.FC<PlayerBoardProps> = ({
     isPlacingOnBoard && canBePlaced(currentSelectedShip!, layout);
   if (isPlacingOnBoard) {
     if (canPlaceCurrentShip) {
-      layout = placeEntityInLayout(
-        layout,
-        currentSelectedShip!,
-        CELL_STATE.ship
-      );
+      layout = placeShipInLayout(layout, currentSelectedShip!, CELL_STATE.ship);
     } else {
       const forbiddenShip = {
         ...currentSelectedShip,
@@ -73,15 +67,15 @@ const PlayerBoard: React.FC<PlayerBoardProps> = ({
           currentSelectedShip!.length! -
           calculateOutOfBoundCells(currentSelectedShip!),
       };
-      layout = placeEntityInLayout(layout, forbiddenShip, CELL_STATE.forbidden);
+      layout = placeShipInLayout(layout, forbiddenShip, CELL_STATE.forbidden);
     }
   }
 
   const cells = layout.map((cell: string, index: number) => {
-    console.log(cell);
     return (
       <Cell
-        // onMouseUp={rotateShip}
+        onContextMenu={(e: MouseEvent<HTMLElement>) => e.preventDefault()}
+        onMouseDown={rotateShip}
         onClick={() => {
           if (canPlaceCurrentShip) {
             placeShipOnBoard(currentSelectedShip!);

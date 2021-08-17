@@ -5,9 +5,8 @@ import { ThemeProvider } from "@material-ui/styles";
 import PrivateRoute from "./components/PrivateRoute";
 import Login from "./pages/Login";
 import Signup from "./pages/Signup";
-import AdminDashboard from "./pages/AdminDashboard";
+import AdminDashBoard from "./pages/AdminDashboard";
 import Game from "./pages/Game";
-import "./css/styles.css";
 
 const theme = createTheme({
   palette: {
@@ -38,7 +37,7 @@ function App() {
           <Route path="/signup">
             <Signup />
           </Route>
-          <PrivateRoute path="/admin/dashboard" component={AdminDashboard} />
+          <PrivateRoute path="/admin/dashboard" component={AdminDashBoard} />
           <Route
             exact
             path="/admin"
