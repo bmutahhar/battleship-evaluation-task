@@ -233,7 +233,6 @@ export const updateSunkShips = (
   currentHits: ShipAttributes[],
   opponentShips: ShipAttributes[]
 ): ShipAttributes[] => {
-  console.log(currentHits);
   let playerHitIndices = currentHits.map((hit: ShipAttributes) =>
     coordinatesToIndex(hit.position!)
   );

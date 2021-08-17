@@ -25,7 +25,8 @@ const OpponentBoard: React.FC<OpponentBoardProps> = ({
   hitsByPlayer,
   setHitsByPlayer,
   currentState,
-  checkIfGameOver,
+  // checkIfGameOver,
+  gameOver,
   handleComputerTurn,
 }) => {
   const headerArray = Array.from(Array(COLUMNS).keys());
@@ -78,7 +79,7 @@ const OpponentBoard: React.FC<OpponentBoardProps> = ({
   };
 
   const playerTurn = currentState === "player-turn";
-  const playerCanFire = playerTurn && !checkIfGameOver();
+  const playerCanFire = playerTurn && !gameOver;
 
   const alreadyHit = (index: number) =>
     opponentLayout[index] === "hit" ||

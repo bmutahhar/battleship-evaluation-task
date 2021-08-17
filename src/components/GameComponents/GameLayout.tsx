@@ -18,8 +18,7 @@ import "./css/styles.css";
 
 const GameLayout: React.FC<GameLayoutProps> = (props) => {
   const classes = useStyles();
-
-  if (props.currentState === "game-over") {
+  if (props.gameOver) {
     return (
       <GameOver
         winner={props.winner}
@@ -35,7 +34,9 @@ const GameLayout: React.FC<GameLayoutProps> = (props) => {
             <Button color="primary" onClick={props.startAgain}>
               Exit Game
             </Button>
-            <Button color="primary">Log Out</Button>
+            <Button color="primary" onClick={props.quitGame}>
+              Log Out
+            </Button>
           </div>
           <MsgContainer>
             <Typography
@@ -69,7 +70,8 @@ const GameLayout: React.FC<GameLayoutProps> = (props) => {
               hitsByPlayer={props.hitsByPlayer}
               setHitsByPlayer={props.setHitsByPlayer}
               currentState={props.currentState}
-              checkIfGameOver={props.checkIfGameOver}
+              // checkIfGameOver={props.checkIfGameOver}
+              gameOver={props.gameOver}
               handleComputerTurn={props.handleComputerTurn}
             />
           </GridRow>

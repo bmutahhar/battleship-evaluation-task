@@ -72,7 +72,8 @@ export interface OpponentBoardProps {
   hitsByPlayer: ShipAttributes[];
   setHitsByPlayer: Dispatch<React.SetStateAction<ShipAttributes[]>>;
   handleComputerTurn: () => void;
-  checkIfGameOver: () => boolean;
+  // checkIfGameOver: () => boolean;
+  gameOver: boolean;
 }
 
 export interface GameOverProps {

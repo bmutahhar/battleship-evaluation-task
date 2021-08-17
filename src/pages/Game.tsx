@@ -45,7 +45,7 @@ const TOTAL_SHIPS_LENGTH = AVAILABLE_SHIPS.slice().reduce(
 
 const Game = () => {
   const [currentState, setCurrentState] = useState("placement");
-  // const [currentState, setCurrentState] = useState("game-over");
+  const [gameOver, setGameOver] = useState(false);
   const [winner, setWinner] = useState<string>("");
 
   const [currentSelectedShip, setCurrentSelectedShip] =
@@ -146,33 +146,32 @@ const Game = () => {
     setHitsByComputer(computerHits);
   };
 
-  const checkIfGameOver = () => {
-    let successfulPlayerHits = hitsByPlayer.filter(
-      (hit) => hit.type === "hit"
-    ).length;
-    let successfulComputerHits = hitsByComputer.filter(
-      (hit) => hit.type === "hit"
-    ).length;
+  // const checkIfGameOver = () => {
+  //   let successfulPlayerHits = hitsByPlayer.filter(
+  //     (hit) => hit.type === "hit"
+  //   ).length;
+  //   let successfulComputerHits = hitsByComputer.filter(
+  //     (hit) => hit.type === "hit"
+  //   ).length;
 
-    if (successfulComputerHits === TOTAL_SHIPS_LENGTH.length) {
-      setWinner("Computer");
-      setCurrentState("game-over");
-      return true;
-    }
-    if (successfulPlayerHits === TOTAL_SHIPS_LENGTH.length) {
-      setWinner("Player 1");
-      setCurrentState("game-over");
-      return true;
-    }
+  //   if (successfulComputerHits === TOTAL_SHIPS_LENGTH.length) {
+  //     setWinner("Computer");
+  //     setCurrentState("game-over");
+  //     return true;
+  //   }
+  //   if (successfulPlayerHits === TOTAL_SHIPS_LENGTH.length) {
+  //     setWinner("Player 1");
+  //     setCurrentState("game-over");
+  //     return true;
+  //   }
 
-    return false;
-  };
+  //   return false;
+  // };
 
   const handleComputerTurn = () => {
     changeTurn();
 
-    if (checkIfGameOver()) {
-      console.log("Game");
+    if (gameOver) {
       return;
     }
 
@@ -230,6 +229,7 @@ const Game = () => {
 
   const startAgain = () => {
     setCurrentState("placement");
+    setGameOver(false);
     setWinner("");
     setCurrentSelectedShip(null);
     setShipsOnBoard([]);
@@ -239,6 +239,31 @@ const Game = () => {
     setHitsByComputer([]);
     history.replace("/game");
   };
+
+  useEffect(() => {
+    let successfulPlayerHits = hitsByPlayer.filter(
+      (hit) => hit.type === "hit"
+    ).length;
+    let successfulComputerHits = hitsByComputer.filter(
+      (hit) => hit.type === "hit"
+    ).length;
+
+    if (
+      successfulComputerHits === TOTAL_SHIPS_LENGTH.length ||
+      successfulPlayerHits === TOTAL_SHIPS_LENGTH.length
+    ) {
+      if (successfulComputerHits === TOTAL_SHIPS_LENGTH.length) {
+        setWinner("Computer");
+        setGameOver(true);
+      }
+      if (successfulPlayerHits === TOTAL_SHIPS_LENGTH.length) {
+        setWinner("Player 1");
+        setGameOver(true);
+      }
+    } else {
+      setGameOver(false);
+    }
+  }, [hitsByComputer, hitsByPlayer]);
 
   return (
     <GameLayout
@@ -258,11 +283,12 @@ const Game = () => {
       hitsByComputer={hitsByComputer}
       setHitsByComputer={setHitsByComputer}
       handleComputerTurn={handleComputerTurn}
-      checkIfGameOver={checkIfGameOver}
+      // checkIfGameOver={checkIfGameOver}
       startAgain={startAgain}
       quitGame={quitGame}
       winner={winner}
       setComputerShips={setComputerShips}
+      gameOver={gameOver}
     />
   );
 };

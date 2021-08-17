@@ -8,7 +8,8 @@ const Harbor: React.FC<HarborProps> = (props) => {
     <HarborContainer>
       <div>
         <Typography variant="body2" align="center" gutterBottom>
-          Drag the ships to the grid <br /> and click to rotate then
+          Click on the ship to select, <br /> then place it on the board. <br />{" "}
+          Right click to rotate it.
         </Typography>
       </div>
 
