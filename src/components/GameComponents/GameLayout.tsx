@@ -25,15 +25,31 @@ const GameLayout: React.FC<GameLayoutProps> = (props) => {
           <Button color="primary">Log Out</Button>
         </div>
         <MsgContainer>
-          <Typography align="center" variant="h6" className={classes.msg}>
-            Place the ships
+          <Typography
+            align="center"
+            variant="h4"
+            color="primary"
+            className={classes.msg}
+          >
+            Battle Ship
           </Typography>
         </MsgContainer>
       </Header>
       <GameContainer>
         <GridRow>
-          <Harbor availableShips={props.availableShips} />
-          <PlayerBoard />
+          <Harbor
+            availableShips={props.availableShips}
+            selectShip={props.selectShip}
+            currentSelectedShip={props.currentSelectedShip}
+          />
+          <PlayerBoard
+            currentSelectedShip={props.currentSelectedShip}
+            setCurrentSelectedShip={props.setCurrentSelectedShip}
+            shipsOnBoard={props.shipsOnBoard}
+            placeShipOnBoard={props.placeShipOnBoard}
+            hitsByComputer={props.hitsByComputer}
+            rotateShip={props.rotateShip}
+          />
           <OpponentBoard />
         </GridRow>
         <GridRow>
@@ -50,6 +66,7 @@ export default GameLayout;
 
 const useStyles = makeStyles((theme: Theme) => ({
   msg: {
-    fontWeight: 500,
+    margin: 0,
+    fontFamily: "frijole",
   },
 }));

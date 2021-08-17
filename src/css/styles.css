@@ -1,0 +1,64 @@
+:root {
+  --primary-color: #5668d1;
+  --primary-color-light: #7786da;
+  --secondary-color: #11183f;
+  --background-color-light: #f1f3f5;
+  --hit-color: #f03e3e;
+  --hit-color-dark: #c92a2a;
+  --miss-color: #ffa8a8;
+  --miss-color-dark: #ff8787;
+  --ship-sunk-color: #343a40;
+  --ship-sunk-color-dark: #212529;
+  --forbidden-color: #ffc9c9;
+  --forbidden-color-dark: #ffe3e3;
+}
+
+.active-ship {
+  background-color: var(--primary-color) !important;
+}
+
+.ship {
+  background-color: var(--primary-color-light);
+  border: 1px solid var(--secondary-color);
+}
+
+.ship:hover {
+  background-color: var(--primary-color);
+}
+
+/* Empty */
+.empty {
+  background-color: var(--background-color-light);
+}
+.empty:hover {
+  background-color: #ccd3dbb2;
+}
+
+/* Hit  */
+
+.hit {
+  background-color: var(--hit-color);
+  border: 1px solid var(--hit-color-dark);
+}
+
+/* Miss */
+
+.miss {
+  background-color: var(--miss-color);
+  border: 1px solid var(--miss-color-dark);
+}
+
+/* Sunk ship */
+
+.board .ship-sunk {
+  background-color: var(--ship-sunk-color);
+  border: 1px solid var(--ship-sunk-color-dark);
+  animation: shake 50ms 6 alternate backwards;
+}
+
+/* Forbidden square  */
+
+.board .forbidden {
+  background-color: var(--forbidden-color);
+  border: 1px solid var(--forbidden-color-dark);
+}

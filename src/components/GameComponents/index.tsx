@@ -1,13 +1,11 @@
 import styled from "styled-components";
-import { ShipCellProps } from "../../models";
-
-const cellWidth = 36.66;
-const cellHeight = 36.11;
+import { CellProps, ShipProps } from "../../models";
 
 export const Container = styled.div`
   width: 100%;
   height: 100vh;
-  background-color: #f7f7f7;
+  background-color: #f1f3f5;
+  overflow: auto;
 `;
 
 export const Header = styled.header`
@@ -39,7 +37,8 @@ export const GridRow = styled.div`
   align-items: center;
   justify-content: center;
   padding: 1rem;
-  @media screen and (max-width: 768px) {
+
+  @media screen and (max-width: 1100px) {
     flex-direction: column-reverse;
   }
 `;
@@ -49,8 +48,8 @@ export const GridContainer = styled.div`
   height: 60vh;
   margin: 1rem 2rem;
   display: grid;
-  grid-template-columns: 0.1fr 1.9fr;
-  grid-template-rows: 0.1fr 1.9fr;
+  grid-template-columns: 0.2fr 1.8fr;
+  grid-template-rows: 0.2fr 1.8fr;
   gap: 0px 0px;
   grid-template-areas:
     ". row"
@@ -64,6 +63,11 @@ export const GridContainer = styled.div`
   }
   .game-grid {
     grid-area: game-grid;
+  }
+
+  @media screen and (max-width: 1100px) {
+    margin: 1rem;
+    padding: 0.5rem;
   }
 `;
 
@@ -95,12 +99,13 @@ export const HeaderCell = styled.div`
   justify-content: center;
 `;
 
-export const Cell = styled.div`
+export const Cell = styled.div<CellProps>`
   width: 10%;
   height: 10%;
   border: 1px solid rgba(86, 104, 209, 0.5);
   margin-left: -1px;
   margin-top: -1px;
+  ${(props) => (!props.opponent ? `cursor: crosshair;` : "")}
 `;
 export const HarborContainer = styled.div`
   height: 100%;
@@ -108,6 +113,10 @@ export const HarborContainer = styled.div`
   flex-direction: column;
   align-items: center;
   justify-content: center;
+  @media screen and (max-width: 1100px) {
+    margin: 1rem;
+    padding: 0.5rem;
+  }
 `;
 export const HarborArea = styled.div`
   width: 30vh;
@@ -116,9 +125,12 @@ export const HarborArea = styled.div`
   flex-direction: column;
   align-items: center;
   justify-content: center;
+  @media screen and (max-width: 1100px) {
+    height: auto;
+  }
 `;
 
-export const Ship = styled.div<ShipCellProps>`
+export const Ship = styled.div<ShipProps>`
   width: 180px;
   height: 40px;
   background-color: #11183f;

@@ -7,6 +7,7 @@ import Login from "./pages/Login";
 import Signup from "./pages/Signup";
 import AdminDashboard from "./pages/AdminDashboard";
 import Game from "./pages/Game";
+import "./css/styles.css";
 
 const theme = createTheme({
   palette: {

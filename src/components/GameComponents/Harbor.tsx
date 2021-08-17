@@ -15,7 +15,17 @@ const Harbor: React.FC<HarborProps> = (props) => {
       <HarborArea>
         {props.availableShips.map((item: ShipAttributes, index: number) => {
           return (
-            <Ship cells={item.length}>
+            <Ship
+              key={item.name}
+              className={
+                props.currentSelectedShip &&
+                props.currentSelectedShip.name === item.name
+                  ? "active-ship"
+                  : ""
+              }
+              cells={item.length!}
+              onClick={() => props.selectShip(index)}
+            >
               <span>{item.name}</span>
               <span>{item.length}</span>
             </Ship>

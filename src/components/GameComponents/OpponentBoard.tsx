@@ -33,7 +33,7 @@ const OpponentBoard = () => {
         </RowHeader>
         <Grid className="game-grid">
           {cellArray.map((item: number) => {
-            return <Cell key={item} />;
+            return <Cell key={item} opponent={true} />;
           })}
         </Grid>
       </GridContainer>
