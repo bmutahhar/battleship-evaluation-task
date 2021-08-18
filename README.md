@@ -8,9 +8,10 @@ The entire frontend was developed using `React`, `Material UI`, and `Typescript`
 #### Installation Instructions:
 
 1. First, clone the repository: `https://github.com/bmutahhar/battleship-evaluation-task.git`
-2. Install all dependencies by running `npm install`
-3. Run the project by using `npm start`
-4. Open `http://localhost:3000` in your browser, preferably google chrome.
+2. Switch to this branch using `git checkout frontend`
+3. Install all dependencies by running `npm install`
+4. Run the project by using `npm start`
+5. Open `http://localhost:3000` in your browser, preferably google chrome.
 
 #### Running the project:
 
