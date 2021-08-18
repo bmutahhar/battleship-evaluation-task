@@ -53,6 +53,7 @@ type connection = boolean;
 const connections: connection[] = [false, false];
 
 let pool: number[] = [];
+let currentTurn = 0;
 
 io.on("connection", (socket: Socket) => {
   // Find an available player number
@@ -81,6 +82,23 @@ io.on("connection", (socket: Socket) => {
     playerId: playerIndex,
   });
 
+  socket.on("gameReady", (opponentShips: any) => {
+    console.log("Both player has joined!");
+    console.log("Player 2 sending ship to player 1");
+    socket.broadcast.emit("opponent-ships", opponentShips);
+  });
+
+  socket.on("opponent-ships-reply", (playerShips: any) => {
+    console.log("Player 1 sending ship to player 2");
+    socket.broadcast.emit("opponent-ships-reply", playerShips);
+  });
+
+  socket.on("start-game", () => {
+    console.log("starting game");
+    console.log("Current Turn: ", currentTurn);
+    io.emit("currentTurn", currentTurn);
+  });
+
   // Handle Diconnect
   socket.on("disconnect", () => {
     console.log(`Player ${playerIndex} disconnected`);
@@ -94,10 +112,23 @@ io.on("connection", (socket: Socket) => {
     });
   });
 
+  // next turn
+
+  socket.on("next-turn", () => {
+    currentTurn = currentTurn === 0 ? 1 : 0;
+    io.emit("currentTurn", currentTurn);
+  });
+
   //Fire event
   socket.on("fire", (index: number) => {
     console.log("Shot fired from ", playerIndex);
 
     socket.broadcast.emit("fire", index);
+  });
+
+  //Fire reply event
+  socket.on("fire-reply", (cellClass: string) => {
+    console.log("Cell Class: ", cellClass);
+    socket.broadcast.emit("fire-reply", cellClass);
   });
 });
