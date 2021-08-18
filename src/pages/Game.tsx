@@ -5,11 +5,7 @@ import GameLayout from "../components/GameComponents/GameLayout";
 import { Layout, PlayerInfo, ShipAttributes } from "../models";
 import {
   CELL_STATE,
-  coordinatesToIndex,
   generateEmptyBoard,
-  generateOpponentsShipsInLayout,
-  generateRandomIndex,
-  getNeighbors,
   indexToCoordinates,
   placeShipInLayout,
   updateSunkShips,
@@ -105,10 +101,7 @@ const Game = () => {
   };
 
   const startTurn = () => {
-    // generateComputerShips();
     connectOnClick();
-    // setMessage('')
-    // setCurrentState("player-turn");
   };
 
   const changeTurn = () => {
@@ -128,15 +121,7 @@ const Game = () => {
     setCanJoin(false);
   };
 
-  // *** COMPUTER ***
-  const generateComputerShips = () => {
-    const generatedComputerShips = generateOpponentsShipsInLayout(
-      AVAILABLE_SHIPS.slice()
-    );
-    setComputerShips(generatedComputerShips);
-  };
-
-  const computerFire = (index: number, layout: Layout) => {
+  const opponentFire = (index: number, layout: Layout) => {
     let computerHits: ShipAttributes[] = [];
     if (layout[index] === "ship") {
       computerHits = [
@@ -189,19 +174,9 @@ const Game = () => {
       layout
     );
 
-    if (socket) {
-      socket!.on("fire", (cellIndex: number) => {
-        computerFire(cellIndex, layout);
-      });
-      console.log("socket found");
-    } else {
-      console.log("socket not found");
-    }
-
-    // setTimeout(() => {
-    //   computerFire(target, layout);
-    //   changeTurn();
-    // }, 300);
+    socket!.on("fire", (cellIndex: number) => {
+      opponentFire(cellIndex, layout);
+    });
   };
 
   const startAgain = () => {
@@ -244,21 +219,22 @@ const Game = () => {
       successfulPlayerHits === TOTAL_SHIPS_LENGTH.length
     ) {
       if (successfulComputerHits === TOTAL_SHIPS_LENGTH.length) {
-        setWinner("Computer");
+        setWinner("Opponent");
         setGameOver(true);
+        socket?.emit("game-over");
       }
       if (successfulPlayerHits === TOTAL_SHIPS_LENGTH.length) {
-        setWinner("Player 1");
+        setWinner("You");
         setGameOver(true);
+        socket?.emit("game-over");
       }
     } else {
       setGameOver(false);
     }
-  }, [hitsByComputer, hitsByPlayer]);
+  }, [hitsByComputer, hitsByPlayer, shipsOnBoard, socket]);
 
   useEffect(() => {
     if (socket) {
-      console.log("Insdie socker if");
       socket.on(
         "player-number",
         (data: { playerId: number; pool: number[] }) => {
@@ -266,11 +242,9 @@ const Game = () => {
             setMessage("Room Full");
           } else {
             if (data.playerId === 0) {
-              console.log("My Player ID: ", data.playerId);
               setPlayerInfo({ playerId: data.playerId, state: "player1" });
             }
             if (data.playerId === 1) {
-              console.log("My Player ID: ", data.playerId);
               setPlayerInfo({ playerId: data.playerId, state: "player2" });
               socket.emit("gameReady", shipsOnBoard);
             }
@@ -284,14 +258,11 @@ const Game = () => {
       );
 
       socket.on("player-connection", (data) => {
-        console.log(`Player ${data.playerId + 1} has ${data.action}`);
         setMessage(`Player ${data.playerId + 1} has ${data.action}`);
         setDisplayOpponentBoard(true);
       });
 
       socket.on("currentTurn", (currentTurn: number) => {
-        console.log("current turn: ", currentTurn);
-        console.log("Player id: ", playerInfo.playerId);
         if (currentTurn === playerInfo.playerId) {
           setCurrentState("player-turn");
           setMessage("Your turn");
@@ -312,8 +283,12 @@ const Game = () => {
         setComputerShips(opponentShips);
         socket.emit("start-game");
       });
+
+      socket.on("game-over", () => {
+        setGameOver(true);
+      });
     }
-  }, [socket, playerInfo]);
+  }, [socket, playerInfo, shipsOnBoard]);
 
   return (
     <GameLayout
