@@ -28,6 +28,7 @@ const OpponentBoard: React.FC<OpponentBoardProps> = ({
   // checkIfGameOver,
   gameOver,
   handleComputerTurn,
+  socket,
 }) => {
   const headerArray = Array.from(Array(COLUMNS).keys());
 
@@ -88,10 +89,12 @@ const OpponentBoard: React.FC<OpponentBoardProps> = ({
 
   const onClickHandler = (index: number) => {
     if (playerCanFire && !alreadyHit(index)) {
+      socket.emit("fire", index);
       const newHits = fireAway(index);
       const shipsWithSunkFlag = updateSunkShips(newHits!, computerShips);
       setComputerShips(shipsWithSunkFlag);
-      handleComputerTurn();
+      // handleComputerTurn();
+      socket.emit("next-turn");
     }
   };
 

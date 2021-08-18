@@ -54,11 +54,13 @@ const GameLayout: React.FC<GameLayoutProps> = (props) => {
         </Header>
         <GameContainer>
           <GridRow>
-            <Harbor
-              availableShips={props.availableShips}
-              selectShip={props.selectShip}
-              currentSelectedShip={props.currentSelectedShip}
-            />
+            {props.availableShips.length > 0 && (
+              <Harbor
+                availableShips={props.availableShips}
+                selectShip={props.selectShip}
+                currentSelectedShip={props.currentSelectedShip}
+              />
+            )}
             <PlayerBoard
               currentSelectedShip={props.currentSelectedShip}
               setCurrentSelectedShip={props.setCurrentSelectedShip}
@@ -67,27 +69,32 @@ const GameLayout: React.FC<GameLayoutProps> = (props) => {
               hitsByComputer={props.hitsByComputer}
               rotateShip={props.rotateShip}
             />
-            <OpponentBoard
-              computerShips={props.computerShips}
-              setComputerShips={props.setComputerShips}
-              hitsByPlayer={props.hitsByPlayer}
-              setHitsByPlayer={props.setHitsByPlayer}
-              currentState={props.currentState}
-              // checkIfGameOver={props.checkIfGameOver}
-              gameOver={props.gameOver}
-              handleComputerTurn={props.handleComputerTurn}
-            />
+            {props.displayOpponentBoard && (
+              <OpponentBoard
+                computerShips={props.computerShips}
+                setComputerShips={props.setComputerShips}
+                hitsByPlayer={props.hitsByPlayer}
+                setHitsByPlayer={props.setHitsByPlayer}
+                currentState={props.currentState}
+                // checkIfGameOver={props.checkIfGameOver}
+                gameOver={props.gameOver}
+                handleComputerTurn={props.handleComputerTurn}
+                socket={props.socket}
+              />
+            )}
           </GridRow>
           <GridRow>
-            <Button
-              variant="contained"
-              color="primary"
-              disableElevation
-              disabled={props.availableShips.length > 0}
-              onClick={props.startTurn}
-            >
-              Join Room
-            </Button>
+            {props.canJoin && (
+              <Button
+                variant="contained"
+                color="primary"
+                disableElevation
+                disabled={props.availableShips.length > 0}
+                onClick={props.joinOnce}
+              >
+                Join Room
+              </Button>
+            )}
           </GridRow>
         </GameContainer>
       </Container>

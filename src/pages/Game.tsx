@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { io } from "socket.io-client";
+import { io, Socket } from "socket.io-client";
 import { useHistory } from "react-router";
 import GameLayout from "../components/GameComponents/GameLayout";
 import { Layout, PlayerInfo, ShipAttributes } from "../models";
@@ -59,11 +59,13 @@ const Game = () => {
   const [hitsByComputer, setHitsByComputer] = useState<ShipAttributes[]>([]);
   const history = useHistory();
   const [message, setMessage] = useState("");
+  const [socket, setSocket] = useState<Socket>();
   const [playerInfo, setPlayerInfo] = useState<PlayerInfo>({
     playerId: 0,
-    connected: false,
-    state: "user",
+    state: "player1",
   });
+  const [displayOpponentBoard, setDisplayOpponentBoard] = useState(false);
+  const [canJoin, setCanJoin] = useState(true);
 
   const selectShip = (index: number) => {
     const shipToPlace = availableShips[index];
@@ -106,18 +108,24 @@ const Game = () => {
     // generateComputerShips();
     connectOnClick();
     // setMessage('')
-    setCurrentState("player-turn");
+    // setCurrentState("player-turn");
   };
 
   const changeTurn = () => {
     setCurrentState((oldGameState) =>
-      oldGameState === "player-turn" ? "computer-turn" : "player-turn"
+      oldGameState === "player-turn" ? "opponent-turn" : "player-turn"
     );
   };
 
   const quitGame = () => {
+    socket?.disconnect();
     history.push("/");
     localStorage.clear();
+  };
+
+  const joinOnce = () => {
+    startTurn();
+    setCanJoin(false);
   };
 
   // *** COMPUTER ***
@@ -183,35 +191,10 @@ const Game = () => {
       layout
     );
 
-    let successfulComputerHits = hitsByComputer.filter(
-      (hit) => hit.type === "hit"
-    );
-
-    let nonSunkComputerHits = successfulComputerHits.filter((hit) => {
-      const hitIndex = coordinatesToIndex(hit.position!);
-      return layout[hitIndex] === "hit";
-    });
-    let potentialTargets: any[] = nonSunkComputerHits
-      .flatMap((hit) => getNeighbors(hit.position!))
-      .filter((idx) => layout[idx] === "empty" || layout[idx] === "ship");
-
-    // Until there's a successful hit
-
-    if (potentialTargets.length === 0) {
-      let layoutIndices = layout.map((_: string, idx: number) => idx);
-      potentialTargets = layoutIndices.filter(
-        (index: any) => layout[index] === "ship" || layout[index] === "empty"
-      );
-    }
-
-    let randomIndex = generateRandomIndex(potentialTargets.length);
-
-    let target = potentialTargets[randomIndex];
-
-    setTimeout(() => {
-      computerFire(target, layout);
-      changeTurn();
-    }, 300);
+    // setTimeout(() => {
+    //   computerFire(target, layout);
+    //   changeTurn();
+    // }, 300);
   };
 
   const startAgain = () => {
@@ -224,29 +207,20 @@ const Game = () => {
     setComputerShips([]);
     setHitsByPlayer([]);
     setHitsByComputer([]);
+    setDisplayOpponentBoard(false);
+    setCanJoin(true);
+    setMessage("");
+    setPlayerInfo({
+      playerId: 0,
+      state: "player1",
+    });
+    socket?.disconnect();
     history.replace("/game");
   };
 
   const connectOnClick = () => {
-    const socket = io("http://localhost:8080");
-    socket.on("player-number", (data: { playerId: number; pool: number[] }) => {
-      if (data.playerId === -1) {
-        setMessage("Room Full");
-      } else {
-        if (data.playerId === 1) {
-          console.log("My Player ID: ", data.playerId);
-          setPlayerInfo({ playerId: 1, state: "enemy", connected: true });
-        }
-        if (data.pool.length === 2) {
-          setMessage(`Player ${data.pool[0] + 1} has connected`);
-        }
-      }
-    });
-
-    socket.on("player-connection", (data) => {
-      console.log(`Player ${data.playerId + 1} has ${data.action}`);
-      setMessage(`Player ${data.playerId + 1} has ${data.action}`);
-    });
+    const socketIo = io("http://localhost:8080");
+    setSocket(socketIo);
   };
 
   // Use effect to checking game over conditions
@@ -275,29 +249,55 @@ const Game = () => {
     }
   }, [hitsByComputer, hitsByPlayer]);
 
-  // use effect for socket io code
-  // useEffect(() => {
-  //   const socket = io("http://localhost:8080");
-  //   socket.on("player-number", (playerId: number) => {
-  //     console.log("Played Id: ", playerId);
-  //     if (playerId === -1) {
-  //       setMessage("Room Full");
-  //     } else {
-  //       if (playerId === 1) {
-  //         setPlayerInfo({ playerId: 1, state: "enemy", connected: true });
-  //       }
-  //     }
-  //   });
+  useEffect(() => {
+    if (socket) {
+      console.log("Insdie socker if");
+      socket.on(
+        "player-number",
+        (data: { playerId: number; pool: number[] }) => {
+          if (data.playerId === -1) {
+            setMessage("Room Full");
+          } else {
+            if (data.playerId === 0) {
+              console.log("My Player ID: ", data.playerId);
+              setPlayerInfo({ playerId: data.playerId, state: "player1" });
+            }
+            if (data.playerId === 1) {
+              console.log("My Player ID: ", data.playerId);
+              setPlayerInfo({ playerId: data.playerId, state: "player2" });
+              socket.emit("gameReady");
+            }
+            // Execute only when second player joined
+            if (data.pool.length === 2) {
+              setMessage(`Player ${data.pool[0] + 1} has connected`);
+              setDisplayOpponentBoard(true);
+            }
+          }
+        }
+      );
 
-  //   socket.on("player-connection", (data) => {
-  //     console.log(`Player number ${data.playerId} has ${data.action}`);
-  //     setMessage(`Player number ${data.playerId} has ${data.action}`);
-  //   });
+      socket.on("player-connection", (data) => {
+        console.log(`Player ${data.playerId + 1} has ${data.action}`);
+        setMessage(`Player ${data.playerId + 1} has ${data.action}`);
+        setDisplayOpponentBoard(true);
+        // startTurn();
+      });
 
-  //   return () => {
-  //     socket.disconnect();
-  //   };
-  // }, []);
+      socket.on("currentTurn", (currentTurn: number) => {
+        console.log("current turn: ", currentTurn);
+        console.log("Player id: ", playerInfo.playerId);
+        if (currentTurn === playerInfo.playerId) {
+          setCurrentState("player-turn");
+          setMessage("Your turn");
+        } else {
+          setCurrentState("opponent-turn");
+          setMessage("Opponent Turn");
+        }
+      });
+
+      socket.on("fire", (cellIndex: number) => {});
+    }
+  }, [socket, playerInfo]);
 
   return (
     <GameLayout
@@ -323,6 +323,10 @@ const Game = () => {
       setComputerShips={setComputerShips}
       gameOver={gameOver}
       message={message}
+      displayOpponentBoard={displayOpponentBoard}
+      socket={socket!}
+      canJoin={canJoin}
+      joinOnce={joinOnce}
     />
   );
 };

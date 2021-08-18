@@ -1,6 +1,7 @@
 import React, {
   Dispatch,
 } from "react-transition-group/node_modules/@types/react";
+import { Socket } from "socket.io-client";
 
 export interface AlertConfig {
   open: boolean;
@@ -74,6 +75,7 @@ export interface OpponentBoardProps {
   handleComputerTurn: () => void;
   // checkIfGameOver: () => boolean;
   gameOver: boolean;
+  socket: Socket;
 }
 
 export interface GameOverProps {
@@ -91,10 +93,12 @@ export interface GameLayoutProps
   changeTurn: () => void;
   setHitsByComputer: Dispatch<React.SetStateAction<ShipAttributes[]>>;
   message: string;
+  displayOpponentBoard: boolean;
+  canJoin: boolean;
+  joinOnce: () => void;
 }
 
 export interface PlayerInfo {
   playerId: number | null;
-  connected: boolean | null;
   state: string | null;
 }
