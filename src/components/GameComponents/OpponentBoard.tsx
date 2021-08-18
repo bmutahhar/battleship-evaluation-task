@@ -99,15 +99,13 @@ const OpponentBoard: React.FC<OpponentBoardProps> = ({
     return (
       <Cell
         onContextMenu={(e: MouseEvent<HTMLElement>) => e.preventDefault()}
-        // className={
-        //   stateToCSSClass[cell] === "hit" ||
-        //   stateToCSSClass[cell] === "miss" ||
-        //   stateToCSSClass[cell] === "ship-sunk" ||
-        //   stateToCSSClass[index] === "ship"
-        //     ? `${stateToCSSClass[cell]}`
-        //     : ``
-        // }
-        className={stateToCSSClass[cell]}
+        className={
+          stateToCSSClass[cell] === "hit" ||
+          stateToCSSClass[cell] === "miss" ||
+          stateToCSSClass[cell] === "ship-sunk"
+            ? `${stateToCSSClass[cell]}`
+            : ``
+        }
         key={`opponent-cell-${index}`}
         id={`opponent-cell-${index}`}
         onClick={() => onClickHandler(index)}
