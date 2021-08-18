@@ -16,6 +16,8 @@ Installation instructions are similar to the frontend single player branch.
 
 #### Running the project:
 
+Run the backend server prior to logging in. Refer to the backend branch for installation instructions. <br/>
+
 The `http://localhost:3000` opens to the default login page where the admin's credentials has been set, which can also be found in code. Login using the credentials to go to Admin's Dashboard.
 
 If you want to login to the game, use the credentials of the approved account, given below:
