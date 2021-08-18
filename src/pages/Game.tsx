@@ -66,7 +66,6 @@ const Game = () => {
   });
   const [displayOpponentBoard, setDisplayOpponentBoard] = useState(false);
   const [canJoin, setCanJoin] = useState(true);
-  let layout: Layout = [];
 
   const selectShip = (index: number) => {
     const shipToPlace = availableShips[index];
@@ -170,7 +169,7 @@ const Game = () => {
     }
 
     // Recreate layout to get eligible squares
-    layout = shipsOnBoard.reduce(
+    let layout = shipsOnBoard.reduce(
       (prevLayout, currentShip) =>
         placeShipInLayout(prevLayout, currentShip, CELL_STATE.ship),
       generateEmptyBoard()
@@ -189,11 +188,15 @@ const Game = () => {
           : prevLayout,
       layout
     );
-    socket!.on("fire", (cellIndex: number) => {
-      computerFire(cellIndex, layout);
-      console.log(cellIndex, layout[cellIndex]);
-      socket?.emit("fire-reply", layout[cellIndex]);
-    });
+
+    if (socket) {
+      socket!.on("fire", (cellIndex: number) => {
+        computerFire(cellIndex, layout);
+      });
+      console.log("socket found");
+    } else {
+      console.log("socket not found");
+    }
 
     // setTimeout(() => {
     //   computerFire(target, layout);
@@ -269,7 +272,7 @@ const Game = () => {
             if (data.playerId === 1) {
               console.log("My Player ID: ", data.playerId);
               setPlayerInfo({ playerId: data.playerId, state: "player2" });
-              socket.emit("gameReady");
+              socket.emit("gameReady", shipsOnBoard);
             }
             // Execute only when second player joined
             if (data.pool.length === 2) {
@@ -284,7 +287,6 @@ const Game = () => {
         console.log(`Player ${data.playerId + 1} has ${data.action}`);
         setMessage(`Player ${data.playerId + 1} has ${data.action}`);
         setDisplayOpponentBoard(true);
-        // startTurn();
       });
 
       socket.on("currentTurn", (currentTurn: number) => {
@@ -298,8 +300,20 @@ const Game = () => {
           setMessage("Opponent Turn");
         }
       });
+
+      // Set ships for player 1
+      socket.on("opponent-ships", (opponentShips: ShipAttributes[]) => {
+        setComputerShips(opponentShips);
+        socket.emit("opponent-ships-reply", shipsOnBoard);
+      });
+
+      // Set ships for player 2
+      socket.on("opponent-ships-reply", (opponentShips: ShipAttributes[]) => {
+        setComputerShips(opponentShips);
+        socket.emit("start-game");
+      });
     }
-  }, [socket, playerInfo, layout]);
+  }, [socket, playerInfo]);
 
   return (
     <GameLayout

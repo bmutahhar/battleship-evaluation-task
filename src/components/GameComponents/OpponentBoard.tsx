@@ -90,13 +90,9 @@ const OpponentBoard: React.FC<OpponentBoardProps> = ({
   const onClickHandler = (index: number) => {
     if (playerCanFire && !alreadyHit(index)) {
       socket.emit("fire", index);
-      socket.on("fire-reply", (cellClass: string) => {
-        console.log("cell class:", cellClass);
-        opponentLayout[index] = cellClass;
-        const newHits = fireAway(index);
-        const shipsWithSunkFlag = updateSunkShips(newHits!, computerShips);
-        setComputerShips(shipsWithSunkFlag);
-      });
+      const newHits = fireAway(index);
+      const shipsWithSunkFlag = updateSunkShips(newHits!, computerShips);
+      setComputerShips(shipsWithSunkFlag);
       handleComputerTurn();
       socket.emit("next-turn");
     }
