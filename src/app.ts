@@ -105,11 +105,18 @@ io.on("connection", (socket: Socket) => {
     connections[playerIndex] = false;
     pool = pool.filter((item: number) => item != playerIndex);
     console.log("Pool: ", pool);
+    currentTurn = 0;
     //Tell everyone what player number just disconnected
     socket.broadcast.emit("player-connection", {
       action: "disconnected",
       playerId: playerIndex,
     });
+  });
+
+  // Game over event
+  socket.on("game-over", () => {
+    console.log("Game over");
+    io.emit("game-over");
   });
 
   // next turn
