@@ -66,6 +66,7 @@ const Game = () => {
   });
   const [displayOpponentBoard, setDisplayOpponentBoard] = useState(false);
   const [canJoin, setCanJoin] = useState(true);
+  let layout: Layout = [];
 
   const selectShip = (index: number) => {
     const shipToPlace = availableShips[index];
@@ -164,14 +165,12 @@ const Game = () => {
   };
 
   const handleComputerTurn = () => {
-    changeTurn();
-
     if (gameOver) {
       return;
     }
 
     // Recreate layout to get eligible squares
-    let layout = shipsOnBoard.reduce(
+    layout = shipsOnBoard.reduce(
       (prevLayout, currentShip) =>
         placeShipInLayout(prevLayout, currentShip, CELL_STATE.ship),
       generateEmptyBoard()
@@ -190,6 +189,11 @@ const Game = () => {
           : prevLayout,
       layout
     );
+    socket!.on("fire", (cellIndex: number) => {
+      computerFire(cellIndex, layout);
+      console.log(cellIndex, layout[cellIndex]);
+      socket?.emit("fire-reply", layout[cellIndex]);
+    });
 
     // setTimeout(() => {
     //   computerFire(target, layout);
@@ -294,10 +298,8 @@ const Game = () => {
           setMessage("Opponent Turn");
         }
       });
-
-      socket.on("fire", (cellIndex: number) => {});
     }
-  }, [socket, playerInfo]);
+  }, [socket, playerInfo, layout]);
 
   return (
     <GameLayout
